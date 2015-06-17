@@ -1,7 +1,7 @@
 import requests
 import socket
 import struct
-from event import *
+from bangarang import event
 
 class Client(object):
 	host = ""
@@ -15,10 +15,10 @@ class Client(object):
 		self.api_port = api_port
 		self.encoding = encoding
 
-	def encode_event(self, event):
+	def encode_event(self, e):
 		"""encode an event given the client's encoding"""
 		if self.encoding is "json":
-			return event.json()
+			return e.json()
 		return ""
 
 	def hosts(self):
@@ -39,8 +39,8 @@ class Client(object):
 class HttpClient(Client):	
 	endpoint = "/ingest"
 
-	def send(self, event):
-		encoded = self.encode_event(event)
+	def send(self, e):
+		encoded = self.encode_event(e)
 		response = requests.post("http://{}:{}{}".format(self.host, self.ingest_port, self.endpoint),data=encoded, headers=self.headers())
 		return response
 
@@ -58,8 +58,8 @@ class TcpClient(Client):
 		self.conn = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 		self.conn.connect((self.host, self.ingest_port))
 
-	def send(self, event):
-		encoded = self.encode_event(event).encode("utf-8")
+	def send(self, e):
+		encoded = self.encode_event(e).encode("utf-8")
 
 		# prepend the length of the upcomming message
 		length = struct.pack("Q", len(encoded))
